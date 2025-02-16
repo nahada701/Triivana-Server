@@ -7,7 +7,7 @@ const jwt=require('jsonwebtoken')
 exports.userRegisterController=async(req,res)=>{
 console.log('inside user registration controller');
  
-const{email,password}=req.body
+const{name,email,password}=req.body
 try{
     const existingUser=await users.findOne({email})
     if(existingUser){
@@ -15,7 +15,7 @@ try{
 
     }
     else{
-        const newUser=new users({email,password})
+        const newUser=new users({name,email,password})
         await newUser.save()
         res.status(200).json(newUser)
     }

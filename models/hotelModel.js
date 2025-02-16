@@ -17,6 +17,14 @@ const hotelSchema=new mongoose.Schema({
         type:String,
         required:true
     },
+    place:{
+        type:String,
+        required:true
+    },
+    minPrice:{
+        type:String,
+        required:true
+    },
     address:{
         type:String,
         required:true
@@ -40,6 +48,12 @@ const hotelSchema=new mongoose.Schema({
         type:String,
         required:true
     }],
+    reviews: [
+        { type: mongoose.Schema.Types.ObjectId, ref: "reviews" }
+    ],
+    rooms: [
+        { type: mongoose.Schema.Types.ObjectId, ref: "rooms" }
+    ],
     createdAt: {
         type: Date,
         default: Date.now

@@ -5,19 +5,18 @@ exports.addHotelController=async(req,res)=>{
     console.log("inside add hotel controller");
     
     try{
-        const {  propertyname, propertytype,phone,email,address,description,checkin,checkout,amenities}=req.body
+        const {  propertyname, propertytype,phone,email,minPrice,place,address,description,checkin,checkout,amenities}=req.body
         
         const images = req.files.map(file => file.filename)
 
         const adminId=req.adminId
-        
         const exisistingHotel=await hotels.findOne({propertyname, propertytype,phone,email,address})
 
         if(exisistingHotel){
             res.status(406).json('hotel already added')
         }
         else{
-            const newHotel = new hotels({propertyname,propertytype,phone,email,address,description,checkin,checkout,amenities,images,adminId
+            const newHotel = new hotels({propertyname,propertytype,phone,email,minPrice,place,address,description,checkin,checkout,amenities,images,reviews:[],rooms:[],adminId
         });
         await newHotel.save()
 
@@ -27,30 +26,31 @@ exports.addHotelController=async(req,res)=>{
         res.status(401).json(err)
     }
 }
-
 exports.getHotelsWithRooms = async (req, res) => {
     console.log("Inside getHotelsWithRooms controller");
 
     try {
         const adminId = req.adminId; 
 
-        const hotelsList = await hotels.find({ adminId });
+        // Populate both rooms and reviews
+        const hotelsWithDetails = await hotels.find({ adminId })
+            .populate("rooms")
+            .populate({
+                path: "reviews",
+                populate: { path: "userId", select: "name email" } // Also get reviewer details
+            });
 
-        if (!hotelsList.length) {
-            return res.status(404).json({ message: "No hotels found for this admin" }); // ✅ Return after sending response
+        if (!hotelsWithDetails.length) {
+            return res.status(404).json({ message: "No hotels found for this admin" });
         }
 
-        const hotelsWithRooms = await Promise.all(hotelsList.map(async (hotel) => {
-            const hotelRooms = await rooms.find({ hotelId: hotel._id }); 
-            return { ...hotel.toObject(), rooms: hotelRooms }; 
-        }));
-        
-        res.status(200).json(hotelsWithRooms);
+        res.status(200).json(hotelsWithDetails);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 
 
 exports.deleteHotelController=async(req,res)=>{
@@ -73,21 +73,42 @@ exports.deleteHotelController=async(req,res)=>{
     }
 }
 
+exports.getSingleHotelController=async(req,res)=>{
+    console.log("inside single hotel controller");
+
+    const id=req.params.id
+    try {
+        
+        const hotelDetails=await hotels.findById(id).populate("rooms").populate({
+            path: "reviews",
+            populate: { path: "userId", select: "name email" } // Also get reviewer details
+        })
+
+       
+            res.status(200).json(hotelDetails)
+
+        
+
+    } catch (error) {
+        res.status(401).json(error)
+    }
+    
+}
+
 exports.getAllHotelController=async(req,res)=>{
-    console.log("inide get all hotel controller");
+    console.log("inside get all hotel controller");
     try {
 
-        const allHotels=await hotels.find()
-        if (!allHotels.length) {
-            return res.status(404).json({ message: "No hotels added yet" }); 
-        }
+       const allHotelsWithDetails=await hotels.find().populate("rooms")
+       .populate({
+           path: "reviews",
+           populate: { path: "userId", select: "name email" } // Also get reviewer details
+       });
+       if (!allHotelsWithDetails.length) {
+        return res.status(404).json({ message: "No hotels found for this admin" });
+    }
 
-        const hotelsWithRooms = await Promise.all(allHotels.map(async (hotel) => {
-            const hotelRooms = await rooms.find({ hotelId: hotel._id }); 
-            return { ...hotel.toObject(), rooms: hotelRooms }; 
-        }));
-        
-        res.status(200).json(hotelsWithRooms);
+        res.status(200).json(allHotelsWithDetails);
 
         
     } catch (error) {

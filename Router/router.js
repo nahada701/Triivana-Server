@@ -3,8 +3,11 @@ const  userController  = require('../controllers/userController')
 const adminController =require('../controllers/adminController')
 const jwtmiddlewareAdmin = require('../middlewares/jwtMiddlewareAdmin')
 const multerMiddleware = require('../middlewares/multerMiddleware')
-const { addHotelController, getHotelsWithRooms, deleteHotelController, getAllHotelController } = require('../controllers/hotelController')
+const { addHotelController, getHotelsWithRooms, deleteHotelController, getAllHotelController, getSingleHotelController } = require('../controllers/hotelController')
 const { addRoomsController, getRoomDetailsController, deleteRoomController } = require('../controllers/roomsControler')
+const jwtmiddlewareUser = require('../middlewares/jwtMiddlewareUser')
+const { addReviewController } = require('../controllers/reviewController')
+const { superAdminLoginController } = require('../controllers/superAdminController')
 
 const router=new express.Router()
 
@@ -51,4 +54,15 @@ router.delete('/delete-room',jwtmiddlewareAdmin,deleteRoomController)
 
 router.get("/get-all-hotels",getAllHotelController)
 
+//add review controller
+
+router.post("/add-review",jwtmiddlewareUser,addReviewController)
+
+//get single hotel data
+
+router.get("/get-single-hotel/:id",getSingleHotelController)
+
+//superadmin login
+
+router.post("/super-admin-login", superAdminLoginController);
 module.exports=router
