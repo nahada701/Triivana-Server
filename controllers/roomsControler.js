@@ -4,7 +4,7 @@ const hotel=require('../models/hotelModel')
 exports.addRoomsController=async(req,res)=>{
     console.log("inside add rooms controller");
 
-    const{hotelId,roomType,numberOfRooms,pricePerNight,description,amenities 
+    const{hotelId,roomType,occupancy,numberOfRooms,pricePerNight,description,amenities 
     }=req.body
 
     const images = req.files.map(file => file.filename);
@@ -13,7 +13,7 @@ exports.addRoomsController=async(req,res)=>{
     try{
         const roomAddingHotel=await hotel.findOne({_id:hotelId})
         if(roomAddingHotel){
-            const newRoom=new rooms({hotelId,roomType,numberOfRooms,pricePerNight,description,amenities,images,adminId})
+            const newRoom=new rooms({hotelId,roomType,numberOfRooms,occupancy,pricePerNight,description,amenities,images,adminId})
             const savedRoom = await newRoom.save();
 
 

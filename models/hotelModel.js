@@ -58,9 +58,16 @@ const hotelSchema=new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    adminId:{
-        type:String,
-        required:true
+    adminId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "admins", // Reference to the admins collection
+        required: true
+    },    
+    status:{
+        type: String, 
+        required: true ,
+        default:"pending",
+        enum: ['pending', 'approved', 'rejected']
     }
 
 })

@@ -10,6 +10,10 @@ const roomSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    occupancy: {
+        type: Number,
+        required: true
+    },
     numberOfRooms: {
         type: Number,
         required: true

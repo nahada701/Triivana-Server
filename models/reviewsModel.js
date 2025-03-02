@@ -2,11 +2,13 @@ const mongoose = require("mongoose");
 
 const reviewSchema = new mongoose.Schema({
     hotelId: { 
-        type: mongoose.Schema.Types.ObjectId, ref: "hotels",
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "hotels",
         required: true
      },
     userId: {
-        type: mongoose.Schema.Types.ObjectId, ref: "users", 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "users", 
         required: true 
         },
     rating: {
@@ -17,6 +19,12 @@ const reviewSchema = new mongoose.Schema({
     comment: { 
         type: String, 
         required: true },
+    status:{
+        type: String, 
+        required: true ,
+        default:"pending",
+        enum: ['pending', 'approved', 'rejected']
+        },
     createdAt: { 
         type: Date, 
         default: Date.now }

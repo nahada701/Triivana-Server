@@ -2,6 +2,10 @@ const superadmins = require("../models/superadminModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const admins=require('../models/adminModel')
+const hotels=require('../models/hotelModel')
+
+
 exports.superAdminLoginController = async (req, res) => {
   console.log("Inside Super Admin login controller");
 
@@ -35,3 +39,49 @@ exports.superAdminLoginController = async (req, res) => {
     res.status(500).json(err);
   }
 };
+
+//get all property Owners controller
+
+exports.getAllPropertyOwners=async(req,res)=>{
+
+  console.log("inside get all propery owners controller");
+try{
+
+  const allPropertyOwners=await admins.find().lean()
+
+  if(allPropertyOwners.length==0){
+   return res.status(404).json("No propertyowners found")
+  }
+
+  for(let owner of allPropertyOwners){
+
+    const approvedHotels=await hotels.find({adminId:owner._id,status:"approved"}).lean()
+    owner.approvedHotels=approvedHotels
+
+  }
+
+  res.status(200).json(allPropertyOwners)
+
+}catch(err){
+  res.status(401).json(err)
+}
+  
+
+}
+
+exports.updateHotelStatusController=async(req,res)=>{
+  console.log("inide update hotel status controller");
+ 
+  const {id,status}=req.body
+
+  if(!status=="approved"| !status=="rejected"){
+    return  res.status(400).json("Invalid status")
+  }
+
+  const updatedHotel=await hotels.findByIdAndUpdate(id,{status},{new:true})
+  if (!updatedHotel) {
+      return res.status(404).json({ success: false, message: "Hotel not found" });
+  }
+  res.status(200).json(updatedHotel);
+
+}

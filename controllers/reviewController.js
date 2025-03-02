@@ -26,3 +26,41 @@ exports.addReviewController = async (req, res) => {
         res.status(500).json(err);
     }
 };
+
+exports.getAllReviews=async(req,res)=>{
+    console.log("inside get all reviews controller");
+    try {
+        const allReviews = await reviews.find()
+        .populate({ path: "hotelId", select: "propertyname" })  // ✅ Correct field name
+        .populate({ path: "userId", select: "name" });
+        res.status(200).json(allReviews)     
+
+    } catch (error) {
+        res.status(401).json(error)
+        
+    }
+    
+}
+
+//update review status
+
+exports.updateReviews=async(req,res)=>{
+    console.log("inide update review controller");
+
+    const {id,status}=req.body
+
+    if(!status=="approved"| !status=="rejected"){
+      return  res.status(400).json("Invalid status")
+    }
+
+    const updatedReview=await reviews.findByIdAndUpdate(id,{status},{new:true})
+    if (!updatedReview) {
+        return res.status(404).json({ success: false, message: "Review not found" });
+    }
+    res.status(200).json(updatedReview);
+
+
+
+
+    
+}

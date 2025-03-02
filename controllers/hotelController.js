@@ -26,7 +26,7 @@ exports.addHotelController=async(req,res)=>{
         res.status(401).json(err)
     }
 }
-exports.getHotelsWithRooms = async (req, res) => {
+exports.getHotelsWithRoomsOwners = async (req, res) => {
     console.log("Inside getHotelsWithRooms controller");
 
     try {
@@ -51,6 +51,56 @@ exports.getHotelsWithRooms = async (req, res) => {
     }
 };
 
+exports.getHotelsSuperAdmin = async (req, res) => {
+    console.log("Inside getHotelsSuperAdmin controller");
+
+    try {
+    
+
+        // Populate both rooms and reviews
+        const hotelsWithDetails = await hotels.find().populate("rooms").populate({
+                path: "reviews",
+                populate: { path: "userId", select: "name email" } // Also get reviewer details
+            }).populate({
+                path:"adminId",
+                select:"firstname lastname"
+            });
+
+        if (!hotelsWithDetails.length) {
+            return res.status(404).json({ message: "No hotels found for this admin" });
+        }
+
+        res.status(200).json(hotelsWithDetails);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+exports.getApprovedHotelsWithRoomsOwners = async (req, res) => {
+    console.log("Inside getHotelsWithRooms controller");
+
+    try {
+        const adminId = req.adminId; 
+
+        // Populate both rooms and reviews
+        const hotelsWithDetails = await hotels.find({ adminId,status:"approved" })
+            .populate("rooms")
+            .populate({
+                path: "reviews",
+                populate: { path: "userId", select: "name email" } // Also get reviewer details
+            });
+
+        if (!hotelsWithDetails.length) {
+            return res.status(404).json({ message: "No approved hotels found for this admin" });
+        }
+
+        res.status(200).json(hotelsWithDetails);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
 
 exports.deleteHotelController=async(req,res)=>{
@@ -95,17 +145,17 @@ exports.getSingleHotelController=async(req,res)=>{
     
 }
 
-exports.getAllHotelController=async(req,res)=>{
+exports.getAllApprovedHotelController=async(req,res)=>{
     console.log("inside get all hotel controller");
     try {
 
-       const allHotelsWithDetails=await hotels.find().populate("rooms")
+       const allHotelsWithDetails=await hotels.find({status:"approved"}).populate("rooms")
        .populate({
            path: "reviews",
            populate: { path: "userId", select: "name email" } // Also get reviewer details
        });
        if (!allHotelsWithDetails.length) {
-        return res.status(404).json({ message: "No hotels found for this admin" });
+        return res.status(404).json({ message: "No approved hotels found " });
     }
 
         res.status(200).json(allHotelsWithDetails);
@@ -115,3 +165,5 @@ exports.getAllHotelController=async(req,res)=>{
         res.status(401).json(error)
     }
 }
+
+
