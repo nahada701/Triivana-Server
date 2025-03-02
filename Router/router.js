@@ -9,7 +9,7 @@ const jwtmiddlewareUser = require('../middlewares/jwtMiddlewareUser')
 const { addReviewController, getAllReviews, updateReviews } = require('../controllers/reviewController')
 const { superAdminLoginController, getAllPropertyOwners, updateHotelStatusController } = require('../controllers/superAdminController')
 const jwtMiddlewareSuperAdmin = require('../middlewares/jwtMiddlewareSuperAdmin')
-const { checkRoomAvailabilityController, newBookingController } = require('../controllers/bookingController')
+const { checkRoomAvailabilityController, newBookingController, sendConfirmationEmail } = require('../controllers/bookingController')
 
 const router=new express.Router()
 
@@ -99,4 +99,7 @@ router.post("/check-room-availability",jwtmiddlewareUser,checkRoomAvailabilityCo
 
 router.post("/newbooking/:hotelId/:roomId",jwtmiddlewareUser,newBookingController)
 
+// send emai 
+
+router.post('/booking-confirmation-email',jwtmiddlewareUser,sendConfirmationEmail)
 module.exports=router
