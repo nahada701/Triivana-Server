@@ -3,11 +3,6 @@ const rooms=require("../models/roomModel")
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
-
-
-
-
-
 exports.checkRoomAvailabilityController=async(req,res)=>{
     console.log("Inside check availability controller");
     try {
@@ -43,17 +38,17 @@ exports.checkRoomAvailabilityController=async(req,res)=>{
 
 exports.newBookingController=async(req,res)=>{
     console.log("Inside room booking controller");
-    const {hotelId,roomId}=req.params
+    const {hotel,room}=req.params
     const userId=req.userId
 
-    const{ name, email, phone, request,checkInDate, checkOutDate, numberOfRooms, numberOfAdults, numberOfChildrens}=req.body   
+    const{ name, email, phone, request,checkInDate, checkOutDate, numberOfRooms, numberOfAdults, numberOfChildrens,totalprice}=req.body   
 
     try {
         
-        if(await bookings.findOne({hotelId,roomId,userId,name, email, phone, request,checkInDate:new Date(checkInDate), checkOutDate:new Date(checkOutDate), numberOfRooms, numberOfAdults, numberOfChildrens})){
+        if(await bookings.findOne({hotel,room,userId,name, email, phone, request,checkInDate:new Date(checkInDate), checkOutDate:new Date(checkOutDate), numberOfRooms, numberOfAdults, numberOfChildrens,totalprice})){
             return res.status(406).json("Already booked")
         }
-        const newBooking=new bookings({hotelId,roomId,userId,name, email, phone, request,checkInDate:new Date(checkInDate), checkOutDate:new Date(checkOutDate), numberOfRooms, numberOfAdults, numberOfChildrens})
+        const newBooking=new bookings({hotel,room,userId,name, email, phone, request,checkInDate:new Date(checkInDate), checkOutDate:new Date(checkOutDate), numberOfRooms, numberOfAdults, numberOfChildrens,totalprice})
         await newBooking.save()
         res.status(200).json(newBooking)
     } catch (error) {
@@ -147,3 +142,37 @@ exports.sendConfirmationEmail=async(req,res)=>{
         
     }
 }
+
+exports.getUserBookingsController=async(req,res)=>{
+    console.log("Get user booking controller");
+    const userId=req.userId
+    try{
+        const userBookingList=await bookings.find({userId}).populate("hotel","propertyname images").populate("room","roomType")
+        res.status(200).json(userBookingList)
+    }
+    catch(err){
+        res.status(401).json(err)
+    }
+}
+
+exports.cancelBookingController=async(req,res)=>{
+    console.log("Inside cancel booking controller");
+    const {bookingId}=req.params
+    try{
+        const existingBooking=await bookings.findById({_id:bookingId})
+        if(existingBooking){
+            existingBooking.status='canceled'
+            existingBooking.save()
+            res.status(200).json(existingBooking)
+        }
+        else{
+            res.status(404).json("no booking found")
+        }
+
+    }
+    catch(err){
+        res.status(401).json(err)
+    }
+    
+}
+

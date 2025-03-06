@@ -1,13 +1,13 @@
 const mongoose=require("mongoose")
 
 const bookingSchema=new mongoose.Schema({
-    hotelId:{
+    hotel:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"hotels",
         required:true
 
     },
-    roomId:{
+    room:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"rooms",
         required:true
@@ -56,7 +56,17 @@ const bookingSchema=new mongoose.Schema({
     createdAt:{
         type:Date,
         default:Date.now
+    },status:{
+        type: String, 
+        required: true ,
+        default:"confirmed",
+        enum: ['confirmed', 'canceled']
+    },
+    totalprice:{
+        type:Number,
+        requred:true
     }
+   
 })
 
 

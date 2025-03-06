@@ -7,9 +7,9 @@ const { addHotelController, getHotelsWithRoomsOwners, deleteHotelController, get
 const { addRoomsController, getRoomDetailsController, deleteRoomController } = require('../controllers/roomsControler')
 const jwtmiddlewareUser = require('../middlewares/jwtMiddlewareUser')
 const { addReviewController, getAllReviews, updateReviews } = require('../controllers/reviewController')
-const { superAdminLoginController, getAllPropertyOwners, updateHotelStatusController } = require('../controllers/superAdminController')
+const { superAdminLoginController, getAllPropertyOwners, updateHotelStatusController, dashboardContentSuperAdminController } = require('../controllers/superAdminController')
 const jwtMiddlewareSuperAdmin = require('../middlewares/jwtMiddlewareSuperAdmin')
-const { checkRoomAvailabilityController, newBookingController, sendConfirmationEmail } = require('../controllers/bookingController')
+const { checkRoomAvailabilityController, newBookingController, sendConfirmationEmail, getUserBookingsController, cancelBookingController } = require('../controllers/bookingController')
 
 const router=new express.Router()
 
@@ -97,9 +97,32 @@ router.post("/check-room-availability",jwtmiddlewareUser,checkRoomAvailabilityCo
 
 //new boooking
 
-router.post("/newbooking/:hotelId/:roomId",jwtmiddlewareUser,newBookingController)
+router.post("/newbooking/:hotel/:room",jwtmiddlewareUser,newBookingController)
 
 // send emai 
 
 router.post('/booking-confirmation-email',jwtmiddlewareUser,sendConfirmationEmail)
+
+// save property
+
+router.put('/save-property',jwtmiddlewareUser,userController.addSavePropertiesController)
+
+// get user saved properties
+
+router.get('/user/saved-properties',jwtmiddlewareUser,userController.getSavedPropertiesController)
+
+// remove saved property
+
+router.delete('/remove/hotel/:hotelId',jwtmiddlewareUser,userController.removeSavedPropertyController)
+
+// get user booking
+
+router.get('/get-user-bookings',jwtmiddlewareUser,getUserBookingsController)
+
+router.put('/cancel-booking/:bookingId',jwtmiddlewareUser,cancelBookingController)
+
+router.get("/super-admin-dashboard",jwtMiddlewareSuperAdmin,dashboardContentSuperAdminController)
+
+
+router.get('/get-all-users',jwtMiddlewareSuperAdmin,userController.getAllUserController)
 module.exports=router

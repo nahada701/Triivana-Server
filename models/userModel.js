@@ -13,6 +13,26 @@ const userSchema=new mongoose.Schema({
     password:{
         type:String,
         required:true,
+    },
+    savedProperties:[{
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "hotels" 
+    }],
+    createdAt:{
+        type:Date,
+        default:Date.now
+    },
+    isBanned: { 
+        type: Boolean,
+        default: false
+    },
+    banReason: { 
+        type: String,
+        default: null
+    },
+    bannedUntil: {
+        type: Date,
+        default: null
     }
 })
 

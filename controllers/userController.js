@@ -1,5 +1,7 @@
 //controller require models ie.database 
 
+const hotels = require('../models/hotelModel');
+
 const users=require('../models/userModel')
 const jwt=require('jsonwebtoken')
 
@@ -15,7 +17,7 @@ try{
 
     }
     else{
-        const newUser=new users({name,email,password})
+        const newUser=new users({name,email,password,savedProperties:[]})
         await newUser.save()
         res.status(200).json(newUser)
     }
@@ -33,6 +35,14 @@ exports.userLoginController=async(req,res)=>{
        
          const {email,password}=req.body
          const existingUser=await users.findOne({email,password})
+         if (existingUser.isBanned) {
+            if (existingUser.bannedUntil && new Date() < existingUser.bannedUntil) {
+                return res.status(403).json({ 
+                    message: `You are temporarily banned until ${existingUser.bannedUntil.toISOString()}`,
+                    bannedUntil: existingUser.bannedUntil
+                });
+            }
+        } 
          if(existingUser){
             const token=jwt.sign({userId:existingUser._id},process.env.JWT_PASSWORD)
             res.status(200).json({user:existingUser,token})
@@ -41,6 +51,97 @@ exports.userLoginController=async(req,res)=>{
             res.status(404).json('user not found')
          }
 
+    }
+    catch(err){
+        res.status(401).json(err)
+    }
+    
+}
+
+exports.addSavePropertiesController=async(req,res)=>{
+    console.log("inide save properties controller");
+  try { 
+    const userId=req.userId
+   const {hotelId}=req.body
+   console.log(userId,hotelId);
+   
+    const existingUserData=await users.findById(userId)
+    if (!existingUserData) {
+        return res.status(404).json({ error: "User not found" });
+    }
+
+    // Properly check if the property is already saved
+    const isAlreadySaved = existingUserData.savedProperties.some(
+        (hotId) => hotId.toString() === hotelId
+    );
+
+    if (isAlreadySaved) {
+        return res.status(406).json({ error: "Hotel already added" });
+    }
+    existingUserData.savedProperties.push(hotelId)
+    await existingUserData.save()
+    console.log(existingUserData);
+    
+    res.status(200).json(existingUserData)
+}
+    catch(err){
+        res.status(401).json(err)
+    }
+    
+}
+
+exports.getSavedPropertiesController=async(req,res)=>{
+    console.log("inide get all saved propery controlller");
+
+    const userId=req.userId
+    try{
+        const user=await users.find({_id:userId}).populate("savedProperties")
+        res.status(200).json(user)
+    }catch(err){
+        res.status(401).json(err)
+    }
+    
+}
+exports.removeSavedPropertyController = async (req, res) => {
+    console.log("Inside remove saved property controller");
+
+    try {
+        const userId = req.userId; // Get user ID from auth middleware
+        const { hotelId } = req.params; // Get hotel ID from request params
+
+        const updatedUser = await users.findOneAndUpdate(
+            { _id: userId }, // Find the user
+            { $pull: { savedProperties: hotelId } }, // Remove hotelId from savedProperties
+            { new: true } // Return updated user data
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.status(200).json({ message: "Hotel removed from saved properties", savedProperties: updatedUser.savedProperties });
+    } catch (err) {
+        console.error(err);
+        res.status(401).json({ error: "Server error" });
+    }
+};
+
+exports.getAllUserController=async(req,res)=>{
+    console.log("inside all users controller");
+
+    try{
+
+        const allUsers=await users.find()
+        const updateResult = await users.updateMany({}, {
+            $set: {
+                isBanned: false,  
+                banReason: null,
+                bannedUntil:null
+            }
+        });
+
+        console.log(`✅ Updated ${updateResult.modifiedCount} users successfully!`);
+        res.status(200).json(allUsers)
     }
     catch(err){
         res.status(401).json(err)

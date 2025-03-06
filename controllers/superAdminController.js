@@ -3,7 +3,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const admins=require('../models/adminModel')
-const hotels=require('../models/hotelModel')
+const hotels=require('../models/hotelModel');
+const users = require("../models/userModel");
+const bookings = require("../models/bookingsModel");
 
 
 exports.superAdminLoginController = async (req, res) => {
@@ -84,4 +86,73 @@ exports.updateHotelStatusController=async(req,res)=>{
   }
   res.status(200).json(updatedHotel);
 
+}
+exports.dashboardContentSuperAdminController=async(req,res)=>{
+  console.log("inside get dashboard super admin Controller ");
+
+  try{
+    const oneYearAgo=new Date()
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear-1)
+    oneYearAgo.setDate(1)
+    const totalUserCount=await users.countDocuments()
+    const totalBookings=await bookings.countDocuments()
+    const totalProperties=await hotels.countDocuments()
+    
+    const monthlyNewUserData=await users.aggregate([
+      {
+       $match:{createdAt:{$gte:oneYearAgo}}
+      },
+      {
+       $group:{
+        _id:{$dateToString:{format:'%Y-%m',date:"$createdAt"}},
+        count:{$sum:1},
+         }
+       },
+      {
+        $sort:{_id:1}
+      }
+    ])
+
+    const monthlyBookingData=await bookings.aggregate([
+      {
+        $match:{createdAt:{$gte:oneYearAgo}}
+      },
+      {
+        $group:{
+          _id:{$dateToString:{format:'%Y-%m',date:"$createdAt"}},
+          count:{$sum:1}
+        }
+      },
+      {
+        $sort:{_id:1}
+      }
+    ])
+
+    const propertyTypesData=await hotels.aggregate([
+      {
+        $match:{status:'approved'}
+      },
+      {
+        $group:{
+          _id:"$propertytype",
+          count:{$sum:1}
+        }
+      }
+    ])
+
+    const allusers = await users.find({ createdAt: { $type: "string" } });
+
+    for (const user of allusers) {
+        await users.updateOne(
+            { _id: user._id },
+            { $set: { createdAt: new Date(user.createdAt) } }
+        );
+        console.log(`Updated user: ${user._id}`);
+    }
+
+    res.status(200).json({propertyTypesData,monthlyBookingData,monthlyNewUserData,totalProperties,totalBookings,totalUserCount})
+  }
+  catch(err){
+    res.status(401).json(err)
+  }
 }
