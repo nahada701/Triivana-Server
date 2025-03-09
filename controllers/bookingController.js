@@ -176,3 +176,21 @@ exports.cancelBookingController=async(req,res)=>{
     
 }
 
+exports.getUserBookingByParams=async(req,res)=>{
+    console.log("Inside  user bookings by user id");
+    const {userId}=req.params
+    try {
+
+        const userBookings=await bookings.find({userId}).populate("hotel","propertyname").populate("room","roomType")
+        const totalCanceled = userBookings.filter(b => b.status === "canceled").length;
+        const totalConfirmed = userBookings.filter(b => b.status === "confirmed").length;
+        const totalPrice = userBookings.filter(b=>b.status === "confirmed").reduce((sum, b) => sum + b.totalprice, 0);
+
+        res.status(200).json({ bookings: userBookings, totalCanceled, totalPrice,totalConfirmed });
+
+        
+    } catch (error) {
+        res.status(401).json(error)
+    }
+    
+}

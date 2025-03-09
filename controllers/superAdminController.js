@@ -94,9 +94,10 @@ exports.dashboardContentSuperAdminController=async(req,res)=>{
     const oneYearAgo=new Date()
     oneYearAgo.setFullYear(oneYearAgo.getFullYear-1)
     oneYearAgo.setDate(1)
-    const totalUserCount=await users.countDocuments()
-    const totalBookings=await bookings.countDocuments()
-    const totalProperties=await hotels.countDocuments()
+    const totalUserCount = await users.countDocuments({ isBanned: false });
+const totalBookings = await bookings.countDocuments();
+const totalProperties = await hotels.countDocuments({ status: "approved" });
+
     
     const monthlyNewUserData=await users.aggregate([
       {

@@ -9,7 +9,8 @@ const jwtmiddlewareUser = require('../middlewares/jwtMiddlewareUser')
 const { addReviewController, getAllReviews, updateReviews } = require('../controllers/reviewController')
 const { superAdminLoginController, getAllPropertyOwners, updateHotelStatusController, dashboardContentSuperAdminController } = require('../controllers/superAdminController')
 const jwtMiddlewareSuperAdmin = require('../middlewares/jwtMiddlewareSuperAdmin')
-const { checkRoomAvailabilityController, newBookingController, sendConfirmationEmail, getUserBookingsController, cancelBookingController } = require('../controllers/bookingController')
+const { checkRoomAvailabilityController, newBookingController, sendConfirmationEmail, getUserBookingsController, cancelBookingController, getUserBookingByParams } = require('../controllers/bookingController')
+const { propertyOwnerDashboardDataController } = require('../controllers/propertOwnerController')
 
 const router=new express.Router()
 
@@ -123,6 +124,17 @@ router.put('/cancel-booking/:bookingId',jwtmiddlewareUser,cancelBookingControlle
 
 router.get("/super-admin-dashboard",jwtMiddlewareSuperAdmin,dashboardContentSuperAdminController)
 
-
 router.get('/get-all-users',jwtMiddlewareSuperAdmin,userController.getAllUserController)
+
+router.get('/user/booking/:userId',jwtMiddlewareSuperAdmin,getUserBookingByParams)
+
+router.post('/banuser',jwtMiddlewareSuperAdmin,userController.banUserController)
+
+
+router.put('/unban/user/:userId',jwtMiddlewareSuperAdmin,userController.unBanUserController)
+
+
+router.get('/propery-owner/dashboard',jwtmiddlewareAdmin,propertyOwnerDashboardDataController)
+
+
 module.exports=router

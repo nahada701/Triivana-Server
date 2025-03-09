@@ -132,15 +132,6 @@ exports.getAllUserController=async(req,res)=>{
     try{
 
         const allUsers=await users.find()
-        const updateResult = await users.updateMany({}, {
-            $set: {
-                isBanned: false,  
-                banReason: null,
-                bannedUntil:null
-            }
-        });
-
-        console.log(`✅ Updated ${updateResult.modifiedCount} users successfully!`);
         res.status(200).json(allUsers)
     }
     catch(err){
@@ -148,3 +139,53 @@ exports.getAllUserController=async(req,res)=>{
     }
     
 }
+
+exports.banUserController = async (req, res) => {
+    console.log("Inside banUser controller");
+
+    const { userId, banReason, numberOfBanDays } = req.body;
+
+    try {
+       
+        const bannedUntil = new Date();
+        bannedUntil.setDate(bannedUntil.getDate() + numberOfBanDays);
+
+        
+        // Update user document
+        const banningUser = await users.updateOne(
+            { _id: userId },
+            { $set: { banReason, isBanned: true, bannedUntil } }
+        );
+
+        if (banningUser.modifiedCount === 0) {
+            return res.status(404).json({ message: "User not found or already banned." });
+        }
+
+        res.status(200).json({ message: "User banned successfully.", banningUser });
+    } catch (err) {
+        console.error("Error banning user:", err);
+        res.status(500).json({ message: "Internal Server Error", error: err });
+    }
+};
+
+exports.unBanUserController = async (req, res) => {
+    console.log("Inside unban User controller");
+
+    const {userId} = req.params;
+
+    try {
+        const unbanningUser = await users.updateOne(
+            { _id: userId },
+            { $set: { banReason:null , isBanned: false, bannedUntil:null } }
+        );
+
+        if (unbanningUser.modifiedCount === 0) {
+            return res.status(404).json({ message: "User not found or already unbaned." });
+        }
+
+        res.status(200).json({ message: "User unbaned successfully.", unbanningUser });
+    } catch (err) {
+        console.error("Error un banning user:", err);
+        res.status(500).json({ message: "Internal Server Error", error: err });
+    }
+};
