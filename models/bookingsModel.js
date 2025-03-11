@@ -56,7 +56,7 @@ const bookingSchema=new mongoose.Schema({
     createdAt:{
         type:Date,
         default:Date.now
-    },status:{
+    },status:{ 
         type: String, 
         required: true ,
         default:"confirmed",
@@ -65,6 +65,24 @@ const bookingSchema=new mongoose.Schema({
     totalprice:{
         type:Number,
         requred:true
+    },
+    paymentStatus:{
+        type:String,
+        enum:["pending","partial","paid"],
+        default:"pending"
+    },
+    paymentMade:{
+        type:Number,
+        default:0
+    },
+    paymentDate:{
+        type:Date,
+        default:null
+    },
+    paymentMethod:{
+        type:String,
+        enum:["cash","card","UPI"],
+        default:"cash"
     }
    
 })

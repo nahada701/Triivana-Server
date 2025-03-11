@@ -40,15 +40,19 @@ exports.newBookingController=async(req,res)=>{
     console.log("Inside room booking controller");
     const {hotel,room}=req.params
     const userId=req.userId
-
     const{ name, email, phone, request,checkInDate, checkOutDate, numberOfRooms, numberOfAdults, numberOfChildrens,totalprice}=req.body   
+    const normalizedCheckInDate = new Date(checkInDate);
+    normalizedCheckInDate.setHours(0, 0, 0, 0);
+    const normalizedCheckOutDate = new Date(checkOutDate);
+    normalizedCheckOutDate.setHours(0, 0, 0, 0);
+
 
     try {
         
-        if(await bookings.findOne({hotel,room,userId,name, email, phone, request,checkInDate:new Date(checkInDate), checkOutDate:new Date(checkOutDate), numberOfRooms, numberOfAdults, numberOfChildrens,totalprice})){
+        if(await bookings.findOne({hotel,room,userId,name, email, phone, request,checkInDate:normalizedCheckInDate, checkOutDate:normalizedCheckOutDate, numberOfRooms, numberOfAdults, numberOfChildrens,totalprice})){
             return res.status(406).json("Already booked")
         }
-        const newBooking=new bookings({hotel,room,userId,name, email, phone, request,checkInDate:new Date(checkInDate), checkOutDate:new Date(checkOutDate), numberOfRooms, numberOfAdults, numberOfChildrens,totalprice})
+        const newBooking=new bookings({hotel,room,userId,name, email, phone, request,checkInDate:normalizedCheckInDate, checkOutDate:normalizedCheckOutDate, numberOfRooms, numberOfAdults, numberOfChildrens,totalprice})
         await newBooking.save()
         res.status(200).json(newBooking)
     } catch (error) {
@@ -81,7 +85,7 @@ exports.sendConfirmationEmail=async(req,res)=>{
     });
     
     const mailOptions={
-        from:process.env.USER_EMAIL,
+        from:process.env.EMAIL_USER,
         to:email,
         subject:"Booking confirmation",
         html:`
@@ -194,3 +198,4 @@ exports.getUserBookingByParams=async(req,res)=>{
     }
     
 }
+

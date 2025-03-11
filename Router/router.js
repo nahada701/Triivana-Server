@@ -10,7 +10,7 @@ const { addReviewController, getAllReviews, updateReviews } = require('../contro
 const { superAdminLoginController, getAllPropertyOwners, updateHotelStatusController, dashboardContentSuperAdminController } = require('../controllers/superAdminController')
 const jwtMiddlewareSuperAdmin = require('../middlewares/jwtMiddlewareSuperAdmin')
 const { checkRoomAvailabilityController, newBookingController, sendConfirmationEmail, getUserBookingsController, cancelBookingController, getUserBookingByParams } = require('../controllers/bookingController')
-const { propertyOwnerDashboardDataController } = require('../controllers/propertOwnerController')
+const { propertyOwnerDashboardDataController, propertyOwnerNewBookingsController, sendCancellationMailByPropertyOwner, updatePaymentController, settleBalancePaymentController, bookingHistoryController, propertyReviewsController } = require('../controllers/propertOwnerController')
 
 const router=new express.Router()
 
@@ -44,7 +44,6 @@ router.get("/get-owner-hotelsdetails",jwtmiddlewareAdmin,getHotelsWithRoomsOwner
 //get all approved hotels with room owner
 
 router.get("/get-owner-approved-hotelsdetails",jwtmiddlewareAdmin,getApprovedHotelsWithRoomsOwners)
-
 
 //delete hotel by owner
 
@@ -135,6 +134,18 @@ router.put('/unban/user/:userId',jwtMiddlewareSuperAdmin,userController.unBanUse
 
 
 router.get('/propery-owner/dashboard',jwtmiddlewareAdmin,propertyOwnerDashboardDataController)
+
+router.get("/property-owner-upcoming-bookings",jwtmiddlewareAdmin,propertyOwnerNewBookingsController)
+
+router.post("/cancellation-mail",jwtmiddlewareAdmin,sendCancellationMailByPropertyOwner)
+
+router.put('/update-payment/:id',jwtmiddlewareAdmin,updatePaymentController)
+
+router.put("/settle-payment/:id",jwtmiddlewareAdmin,settleBalancePaymentController)
+
+router.get("/admin-booking-history",jwtmiddlewareAdmin,bookingHistoryController)
+
+router.get("/reviews-admin",jwtmiddlewareAdmin,propertyReviewsController)
 
 
 module.exports=router
