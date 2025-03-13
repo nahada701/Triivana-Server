@@ -87,14 +87,18 @@ exports.propertyOwnerDashboardDataController = async (req, res) => {
             {
                 $match: {
                     hotel: { $in: hotelIdsArray },
-                    checkInDate: { $lte: today },
-                    checkOutDate: { $gt: today }
+                    $and: [
+                        { checkInDate: { $lte: today } },
+                        { checkOutDate: { $gt: today } }
+                    ],
+                    status: "confirmed"
                 }
+                
             },
             {
                 $group: {
                     _id: "$room",
-                    bookedCount: { $sum: 1 }
+                    bookedCount: { $sum: "$numberOfRooms" }
                 }
             }
         ]);
@@ -514,3 +518,236 @@ exports.propertyReviewsController = async (req, res) => {
     }
 };
 
+
+exports.propertyOwnerEarningsController=async(req,res)=>{
+    console.log("inside property owner earnings controller");
+    const adminId=req.adminId
+
+    const lastThirtyDays = new Date();
+    lastThirtyDays.setDate(lastThirtyDays.getDate() - 30);
+    lastThirtyDays.setHours(0, 0, 0, 0);
+
+    const lastOneYear=new Date()
+    lastOneYear.setFullYear(lastOneYear.getFullYear()-1)
+    lastOneYear.setHours(0, 0, 0, 0);
+
+
+    
+
+    try {
+        const hotelLists=await hotels.find({adminId,status:"approved"}).select("_id")
+        const hotelArray=hotelLists.map(hotel=>hotel._id)
+
+        const totalEarnings=await bookings.aggregate([
+            {
+                $match:{
+                    hotel:{$in:hotelArray},
+                    paymentStatus:"paid",
+                    status:"confirmed"
+                }
+            },
+            {
+                $group:{
+                    _id:"$hotel",
+                    totalEarnings:{$sum:"$paymentMade"}
+                }
+            },
+            {
+                $lookup:{
+                    from:"hotels",
+                    localField:"_id",
+                    foreignField:"_id",
+                    as:"hotelDetails"
+                }
+            },
+            {
+                $unwind:"$hotelDetails"
+            },
+            {
+                $project:{
+                    hotel:"$hotelDetails.propertyname",
+                    totalEarnings:1,
+                    _id:1
+                }
+            }
+        ])
+
+        const lastThirtyDaysEarnings=await bookings.aggregate([
+            {
+                $match:{
+                    hotel:{$in:hotelArray},
+                    paymentStatus:"paid",
+                    status:"confirmed",
+                    paymentDate:{$gte:lastThirtyDays}
+                }
+            },
+            {
+                $group:{
+                    _id:"$hotel",
+                    thirtyDaysEarnings:{$sum:"$paymentMade"}
+                }
+            },
+            {
+                $lookup:{
+                    from:"hotels",
+                    localField:"_id",
+                    foreignField:"_id",
+                    as:"hotelDetails"
+                }
+            },
+            {
+                $unwind:"$hotelDetails"
+            },
+            {
+                $project:{
+                    hotel:"$hotelDetails.propertyname",
+                    thirtyDaysEarnings:1,
+                    _id:1
+                }
+            }
+        ])
+
+        const lastYearEarnings=await bookings.aggregate([
+            {
+                $match:{
+                    hotel:{$in:hotelArray},
+                    paymentStatus:"paid",
+                    status:"confirmed",
+                    paymentDate:{$gte:lastOneYear}
+                }
+            },
+            {
+                $group:{
+                    _id:"$hotel",
+                    oneYearEarning:{$sum:"$paymentMade"}
+                }
+            },
+            {
+                $lookup:{
+                    from:"hotels",
+                    localField:"_id",
+                    foreignField:"_id",
+                    as:"hotelDetails"
+                }
+            },
+            {
+                $unwind:"$hotelDetails"
+            },
+            {
+                $project:{
+                    hotel:"$hotelDetails.propertyname",
+                    oneYearEarning:1,
+                    _id:1
+                }
+            }
+        ])
+
+        const lastYearHotelGraphData = await bookings.aggregate([
+            {
+                $match: {
+                    hotel: { $in: hotelArray },
+                    paymentStatus: "paid",
+                    status: "confirmed",
+                    paymentDate: { $gte: lastOneYear }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        hotel: "$hotel",
+                        month: { $dateToString: { format: "%Y-%m", date: "$paymentDate" } }
+                    },
+                    totalPayment: { $sum: "$paymentMade" }
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id.hotel",
+                    monthlyPayments: {
+                        $push: {
+                            month: "$_id.month",
+                            totalPayment: "$totalPayment"
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "hotels",
+                    localField: "_id",  // Fixed lookup field
+                    foreignField: "_id",
+                    as: "hotelDetails"
+                }
+            },
+            {
+                $unwind: "$hotelDetails"
+            },
+            {
+                $project: {
+                    _id: 1,
+                    hotelName: "$hotelDetails.propertyname",
+                    monthlyPayments: {
+                        $sortArray: {
+                            input: "$monthlyPayments",
+                            sortBy: { month: 1 } // Sort months chronologically
+                        }
+                    }
+                }
+            }
+        ]);
+
+        const paymentModeData = await bookings.aggregate([
+            {
+                $match: {
+                    hotel: { $in: hotelArray },
+                    paymentStatus: "paid",
+                    status: "confirmed",
+                    paymentDate: { $gte: lastOneYear }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        hotel: "$hotel",
+                        paymentMethod: "$paymentMethod"
+                    },
+                    count: { $sum: 1 } // Count occurrences instead of summing a string
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id.hotel",
+                    paymentMethods: {
+                        $push: {
+                            method: "$_id.paymentMethod",
+                            count: "$count"
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "hotels",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "HotelDetails"
+                }
+            },
+            {
+                $unwind: "$HotelDetails"
+            },
+            {
+                $project: {
+                    _id: 1,
+                    hotelName: "$HotelDetails.propertyname",
+                    paymentMethods: 1
+                }
+            }
+        ]);
+        
+        
+        res.status(200).json({totalEarnings:totalEarnings,lastThirtyDaysEarnings:lastThirtyDaysEarnings,lastYearEarnings:lastYearEarnings,lastYearHotelGraphData:lastYearHotelGraphData,paymentModeData:paymentModeData})
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+}

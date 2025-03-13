@@ -23,7 +23,7 @@ try{
     }
 
 }catch(err){
-    res.status(401).json(err)
+    res.status(500).json(err)
 }
 
 
@@ -53,7 +53,7 @@ exports.userLoginController=async(req,res)=>{
 
     }
     catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
     
 }
@@ -85,7 +85,7 @@ exports.addSavePropertiesController=async(req,res)=>{
     res.status(200).json(existingUserData)
 }
     catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
     
 }
@@ -98,7 +98,7 @@ exports.getSavedPropertiesController=async(req,res)=>{
         const user=await users.find({_id:userId}).populate("savedProperties")
         res.status(200).json(user)
     }catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
     
 }
@@ -122,7 +122,7 @@ exports.removeSavedPropertyController = async (req, res) => {
         res.status(200).json({ message: "Hotel removed from saved properties", savedProperties: updatedUser.savedProperties });
     } catch (err) {
         console.error(err);
-        res.status(401).json({ error: "Server error" });
+        res.status(500).json({ error: "Server error" });
     }
 };
 
@@ -135,7 +135,7 @@ exports.getAllUserController=async(req,res)=>{
         res.status(200).json(allUsers)
     }
     catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
     
 }

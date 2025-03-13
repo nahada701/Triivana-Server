@@ -7,12 +7,12 @@ exports.checkRoomAvailabilityController=async(req,res)=>{
     console.log("Inside check availability controller");
     try {
         
-        const{checkInDate,checkOutDate,numberOfRooms,roomId}=req.body
+        const{checkInDate,checkOutDate,roomId}=req.body
         const start=new Date(checkInDate)
         const end=new Date(checkOutDate)
 
         const existingBookings=await bookings.find({
-            roomId,
+            room:roomId,
             $and:[
                 {checkInDate:{$lt:end},checkOutDate:{$gt:start}}
             ]
@@ -29,7 +29,7 @@ exports.checkRoomAvailabilityController=async(req,res)=>{
       
 
     } catch (error) {
-        res.status(401).json(error)
+        res.status(500).json(error)
     }
 
     
@@ -56,7 +56,7 @@ exports.newBookingController=async(req,res)=>{
         await newBooking.save()
         res.status(200).json(newBooking)
     } catch (error) {
-        res.status(401).json(error)
+        res.status(500).json(error)
     }
 
 }
@@ -142,7 +142,7 @@ exports.sendConfirmationEmail=async(req,res)=>{
         res.status(200).json("Email end succesfully")
     }
     catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
         
     }
 }
@@ -155,7 +155,7 @@ exports.getUserBookingsController=async(req,res)=>{
         res.status(200).json(userBookingList)
     }
     catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
 }
 
@@ -175,7 +175,7 @@ exports.cancelBookingController=async(req,res)=>{
 
     }
     catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
     
 }
@@ -194,7 +194,7 @@ exports.getUserBookingByParams=async(req,res)=>{
 
         
     } catch (error) {
-        res.status(401).json(error)
+        res.status(500).json(error)
     }
     
 }

@@ -12,7 +12,13 @@ const userSchema=new mongoose.Schema({
     },
     password:{
         type:String,
-        required:true,
+        
+    },
+    googleId: { 
+        type: String, 
+        unique: true, 
+        sparse: true // Allows this field to be empty for normal users
+
     },
     savedProperties:[{
         type: mongoose.Schema.Types.ObjectId, 

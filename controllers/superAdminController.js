@@ -65,7 +65,7 @@ try{
   res.status(200).json(allPropertyOwners)
 
 }catch(err){
-  res.status(401).json(err)
+  res.status(500).json(err)
 }
   
 
@@ -154,6 +154,6 @@ const totalProperties = await hotels.countDocuments({ status: "approved" });
     res.status(200).json({propertyTypesData,monthlyBookingData,monthlyNewUserData,totalProperties,totalBookings,totalUserCount})
   }
   catch(err){
-    res.status(401).json(err)
+    res.status(500).json(err)
   }
 }

@@ -27,7 +27,7 @@ exports.addRoomsController=async(req,res)=>{
 
 
     }catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
 }
 
@@ -42,7 +42,7 @@ exports.getRoomDetailsController=async(req,res)=>{
     }else{
         res.status(404).json("no rooms find for the hotel")
     }}catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
     
 }
@@ -65,6 +65,54 @@ exports.deleteRoomController=async(req,res)=>{
 
     }
     catch(err){
-        res.status(401).json(err)
+        res.status(500).json(err)
     }
 }
+
+exports.getRoomByRoomIdController=async(req,res)=>{
+    console.log("get room by room id controller");
+
+    const {roomId}=req.params
+    try{
+        const roomDetails=await rooms.findById(roomId)
+        res.status(200).json(roomDetails)
+    }
+    catch(err){
+        res.status(500).json(err)
+    }
+    
+}
+
+exports.editRoomsController = async (req, res) => {
+    try {
+        const { roomId } = req.params; 
+        const{roomType,occupancy,numberOfRooms,pricePerNight,description,amenities,existingImages}=req.body
+     
+        const room = await rooms.findById(roomId);
+        if (!room) {
+            return res.status(404).json({ message: "Room not found" });
+        }
+
+        // Handle images: Keep old ones & add new ones
+        const newImages = req.files.map(file => file.filename); // Uploaded images
+        const updatedImages = [...(existingImages || []), ...newImages]; // Combine existing + new images
+
+        room.roomType = roomType;
+        room.occupancy = occupancy;
+        room.numberOfRooms =numberOfRooms;
+        room.pricePerNight = pricePerNight;
+        room.description = description;
+        room.amenities = amenities;
+        room.images = updatedImages;
+
+     
+        // Save updated hotel
+        await room.save();
+
+        res.status(200).json({ message: "Room updated successfully", room });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error", error: err });
+    }
+};

@@ -3,14 +3,15 @@ const  userController  = require('../controllers/userController')
 const adminController =require('../controllers/adminController')
 const jwtmiddlewareAdmin = require('../middlewares/jwtMiddlewareAdmin')
 const multerMiddleware = require('../middlewares/multerMiddleware')
-const { addHotelController, getHotelsWithRoomsOwners, deleteHotelController, getSingleHotelController, getAllApprovedHotelController, getApprovedHotelsWithRoomsOwners, getHotelsSuperAdmin } = require('../controllers/hotelController')
-const { addRoomsController, getRoomDetailsController, deleteRoomController } = require('../controllers/roomsControler')
+const { addHotelController, getHotelsWithRoomsOwners, deleteHotelController, getSingleHotelController, getAllApprovedHotelController, getApprovedHotelsWithRoomsOwners, getHotelsSuperAdmin, editHotelController, getHotelDetialsController } = require('../controllers/hotelController')
+const { addRoomsController, getRoomDetailsController, deleteRoomController, getRoomByRoomIdController, editRoomsController } = require('../controllers/roomsControler')
 const jwtmiddlewareUser = require('../middlewares/jwtMiddlewareUser')
 const { addReviewController, getAllReviews, updateReviews } = require('../controllers/reviewController')
 const { superAdminLoginController, getAllPropertyOwners, updateHotelStatusController, dashboardContentSuperAdminController } = require('../controllers/superAdminController')
 const jwtMiddlewareSuperAdmin = require('../middlewares/jwtMiddlewareSuperAdmin')
 const { checkRoomAvailabilityController, newBookingController, sendConfirmationEmail, getUserBookingsController, cancelBookingController, getUserBookingByParams } = require('../controllers/bookingController')
-const { propertyOwnerDashboardDataController, propertyOwnerNewBookingsController, sendCancellationMailByPropertyOwner, updatePaymentController, settleBalancePaymentController, bookingHistoryController, propertyReviewsController } = require('../controllers/propertOwnerController')
+const { propertyOwnerDashboardDataController, propertyOwnerNewBookingsController, sendCancellationMailByPropertyOwner, updatePaymentController, settleBalancePaymentController, bookingHistoryController, propertyReviewsController, propertyOwnerEarningsController } = require('../controllers/propertOwnerController')
+const { googleAuthController } = require('../controllers/authController')
 
 const router=new express.Router()
 
@@ -146,6 +147,18 @@ router.put("/settle-payment/:id",jwtmiddlewareAdmin,settleBalancePaymentControll
 router.get("/admin-booking-history",jwtmiddlewareAdmin,bookingHistoryController)
 
 router.get("/reviews-admin",jwtmiddlewareAdmin,propertyReviewsController)
+
+router.post("/google-auth", googleAuthController);
+
+router.get("/earnings-admin",jwtmiddlewareAdmin,propertyOwnerEarningsController)
+
+router.get("/hoteldetails/:hotelId",jwtmiddlewareAdmin,getHotelDetialsController)
+
+router.put('/edit-property/:hotelId',jwtmiddlewareAdmin,multerMiddleware.array("newImages"),editHotelController)
+
+router.get("/room-details/:roomId",jwtmiddlewareAdmin,getRoomByRoomIdController)
+
+router.put('/edit-room/:roomId',jwtmiddlewareAdmin,multerMiddleware.array("newImages"),editRoomsController)
 
 
 module.exports=router

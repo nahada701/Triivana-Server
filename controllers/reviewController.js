@@ -36,7 +36,7 @@ exports.getAllReviews=async(req,res)=>{
         res.status(200).json(allReviews)     
 
     } catch (error) {
-        res.status(401).json(error)
+        res.status(500).json(error)
         
     }
     
@@ -47,7 +47,7 @@ exports.getAllReviews=async(req,res)=>{
 exports.updateReviews=async(req,res)=>{
     console.log("inide update review controller");
 
-    const {id,status}=req.body
+    try{const {id,status}=req.body
 
     if(!status=="approved"| !status=="rejected"){
       return  res.status(400).json("Invalid status")
@@ -57,10 +57,9 @@ exports.updateReviews=async(req,res)=>{
     if (!updatedReview) {
         return res.status(404).json({ success: false, message: "Review not found" });
     }
-    res.status(200).json(updatedReview);
-
-
-
-
+    res.status(200).json(h);}
+    catch(err){
+        res.status(500).json(err)
+    }
     
 }
