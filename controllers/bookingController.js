@@ -132,7 +132,7 @@ console.log(propertyname);
                 <hr style="margin: 20px 0;">
                 <p style="font-size: 12px; text-align: center; color: #777;">
                     This is an automated email, please do not reply. If you have any questions, contact our support team at 
-                    <a href="mailto:support@triivana.com" style="color: #2c3e50;">support@your-hotel-app.com</a>.
+                    <a href="mailto:support@triivana.com" style="color: #2c3e50;">support@trivana.com</a>.
                 </p>
             </div>
             `
