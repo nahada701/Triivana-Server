@@ -65,6 +65,7 @@ exports.newBookingController=async(req,res)=>{
 exports.sendConfirmationEmail=async(req,res)=>{
     console.log("Inside send email controller");
     const{name,email,checkInDate, checkOutDate, numberOfRooms,numberOfAdults,numberOfChildrens,propertyname,roomType}=req.body
+console.log(propertyname);
 
     const start=new Date(checkInDate).toLocaleDateString()
     const end=new Date(checkOutDate).toLocaleDateString()
@@ -90,8 +91,8 @@ exports.sendConfirmationEmail=async(req,res)=>{
         subject:"Booking confirmation",
         html:`
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
-                <div style="text-align: center;background-color:black">
-                    <img  src="https://i.postimg.cc/nzW2yrmM/logoT.png" alt="Triivana Logo" style="width: 150px; margin-bottom: 10px;">
+                <div style="text-align: center;">
+                              <h2 style="color: #2c3e50; text-align: center;">Triivana</h2>
                 </div>
                 <h2 style="color: #2c3e50; text-align: center;">Your Booking is Confirmed! 🎉</h2>
                 <h3 style="color: #555; text-align: center;">Dear <strong>${name}</strong>,</h3>

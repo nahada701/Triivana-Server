@@ -18,6 +18,7 @@
         type:String,
         required:true,
     }
+    
  })
 
  const admins=mongoose.model("admins",adminSchema)

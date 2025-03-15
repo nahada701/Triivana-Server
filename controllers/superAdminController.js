@@ -42,7 +42,43 @@ exports.superAdminLoginController = async (req, res) => {
   }
 };
 
-//get all property Owners controller
+
+exports.superAdminChangePasswordController = async (req, res) => {
+  console.log("Inside Super Admin change password controller");
+
+  const { email, oldPassword, newPassword } = req.body;
+console.log(email, oldPassword, newPassword);
+
+  try {
+    // Check if the super admin exists
+    const existingSuperAdmin = await superadmins.findOne({ email });
+
+    if (!existingSuperAdmin) {
+      return res.status(404).json({ message: "Super Admin not found" });
+    }
+
+    // Compare old password with the stored hashed password
+    const isMatch = await bcrypt.compare(oldPassword, existingSuperAdmin.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password in database
+    existingSuperAdmin.password = hashedPassword;
+    await existingSuperAdmin.save();
+
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
 
 exports.getAllPropertyOwners=async(req,res)=>{
 

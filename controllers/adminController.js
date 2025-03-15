@@ -39,3 +39,34 @@ exports.adminLoginController=async(req,res)=>{
     }
     
 }
+exports.adminChangePasswordcontroller=async(req,res)=>{
+    console.log("Inside admin chanage password ");
+
+     const { email, oldPassword, newPassword } = req.body;
+     const adminId=req.adminId
+    console.log(email, oldPassword, newPassword);
+    
+      try {
+      
+        const existingAdmin = await admins.findOne({ _id:adminId,email });
+    console.log(existingAdmin);
+    
+        if (!existingAdmin) {
+          return res.status(404).json({ message: " Admin not found" });
+        }
+    
+        const isMatch =  oldPassword==existingAdmin.password    
+        if (!isMatch) {
+          return res.status(400).json({ message: "Old password is incorrect" });
+        }
+    
+    
+        existingAdmin.password = newPassword;
+        await existingAdmin.save();
+    
+        res.status(200).json({ message: "Password changed successfully" });
+      } catch (err) {
+        res.status(500).json({ message: "Server error", error: err.message });
+      }
+    
+}

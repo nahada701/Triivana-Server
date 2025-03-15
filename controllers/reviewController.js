@@ -48,7 +48,7 @@ exports.updateReviews=async(req,res)=>{
     console.log("inide update review controller");
 
     try{const {id,status}=req.body
-
+    console.log(id,status)
     if(!status=="approved"| !status=="rejected"){
       return  res.status(400).json("Invalid status")
     }
@@ -57,7 +57,7 @@ exports.updateReviews=async(req,res)=>{
     if (!updatedReview) {
         return res.status(404).json({ success: false, message: "Review not found" });
     }
-    res.status(200).json(h);}
+    res.status(200).json(updatedReview);}
     catch(err){
         res.status(500).json(err)
     }

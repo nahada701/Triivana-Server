@@ -4,59 +4,86 @@ const hotels = require('../models/hotelModel');
 
 const users=require('../models/userModel')
 const jwt=require('jsonwebtoken')
+const Otp=require('../models/OTPModel')
 
-
-exports.userRegisterController=async(req,res)=>{
-console.log('inside user registration controller');
- 
-const{name,email,password}=req.body
-try{
-    const existingUser=await users.findOne({email})
-    if(existingUser){
-        res.status(406).json("user already exists")
-
+exports.userRegisterController = async (req, res) => {
+    console.log("Inside user registration controller");
+  
+    const { name, email, password, otp } = req.body; // Extract OTP from request
+  
+    try {
+      // Step 1: Verify OTP
+      const otpRecord = await Otp.findOne({ email, otp });
+      if (!otpRecord) {
+        return res.status(400).json({ error: "Invalid or expired OTP" });
+      }
+  
+      // Step 2: Check if user already exists
+      const existingUser = await users.findOne({ email });
+      if (existingUser) {
+        return res.status(406).json({ error: "User already exists" });
+      }
+  
+      // Step 3: OTP is valid and user does not exist → Delete OTP record
+      await Otp.deleteOne({ email });
+  
+      // Step 4: Create new user
+      const newUser = new users({ name, email, password, savedProperties: [] });
+      await newUser.save();
+  
+      return res.status(200).json({ message: "User registered successfully", user: newUser });
+  
+    } catch (err) {
+      console.error("Error in user registration:", err);
+      return res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
-    else{
-        const newUser=new users({name,email,password,savedProperties:[]})
-        await newUser.save()
-        res.status(200).json(newUser)
-    }
+  };
+  
 
-}catch(err){
-    res.status(500).json(err)
-}
+exports.userLoginController = async (req, res) => {
+    console.log("Inside user login controller");
 
+    try {
+        const { email, password } = req.body;
 
-}
+        // Find user by email and password
+        const existingUser = await users.findOne({ email, password });
 
-exports.userLoginController=async(req,res)=>{
-    console.log("inside user login controller");
-    try{
-       
-         const {email,password}=req.body
-         const existingUser=await users.findOne({email,password})
-         if (existingUser.isBanned) {
+        // Handle case where user is not found
+        if (!existingUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Check if user is banned
+        if (existingUser.isBanned) {
             if (existingUser.bannedUntil && new Date() < existingUser.bannedUntil) {
-                return res.status(403).json({ 
-                    message: `You are temporarily banned until ${existingUser.bannedUntil.toISOString()}`,
-                    bannedUntil: existingUser.bannedUntil
-                });
+                return res.status(403).json({message:`You are temporarily banned until ${existingUser?.bannedUntil.toLocaleDateString()} due to ${existingUser.banReason}` });
             }
-        } 
-         if(existingUser){
-            const token=jwt.sign({userId:existingUser._id},process.env.JWT_PASSWORD)
-            res.status(200).json({user:existingUser,token})
-         }
-         else{
-            res.status(404).json('user not found')
-         }
+        }
+        
+        
 
+        // Ensure JWT secret is set
+        if (!process.env.JWT_PASSWORD) {
+            console.error("JWT_PASSWORD is not defined in environment variables");
+            return res.status(500).json({ error: "Server configuration error" });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: existingUser._id },
+            process.env.JWT_PASSWORD,
+            { expiresIn: "1d" }
+        );
+
+        res.status(200).json({ user: existingUser, token });
+
+    } catch (err) {
+        console.error("Error in userLoginController:", err); // Log for debugging
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
-    catch(err){
-        res.status(500).json(err)
-    }
-    
-}
+};
+
 
 exports.addSavePropertiesController=async(req,res)=>{
     console.log("inide save properties controller");

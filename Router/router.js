@@ -7,11 +7,12 @@ const { addHotelController, getHotelsWithRoomsOwners, deleteHotelController, get
 const { addRoomsController, getRoomDetailsController, deleteRoomController, getRoomByRoomIdController, editRoomsController } = require('../controllers/roomsControler')
 const jwtmiddlewareUser = require('../middlewares/jwtMiddlewareUser')
 const { addReviewController, getAllReviews, updateReviews } = require('../controllers/reviewController')
-const { superAdminLoginController, getAllPropertyOwners, updateHotelStatusController, dashboardContentSuperAdminController } = require('../controllers/superAdminController')
+const { superAdminLoginController, getAllPropertyOwners, updateHotelStatusController, dashboardContentSuperAdminController, superAdminChangePasswordController } = require('../controllers/superAdminController')
 const jwtMiddlewareSuperAdmin = require('../middlewares/jwtMiddlewareSuperAdmin')
 const { checkRoomAvailabilityController, newBookingController, sendConfirmationEmail, getUserBookingsController, cancelBookingController, getUserBookingByParams } = require('../controllers/bookingController')
 const { propertyOwnerDashboardDataController, propertyOwnerNewBookingsController, sendCancellationMailByPropertyOwner, updatePaymentController, settleBalancePaymentController, bookingHistoryController, propertyReviewsController, propertyOwnerEarningsController } = require('../controllers/propertOwnerController')
 const { googleAuthController } = require('../controllers/authController')
+const { sendOtpController } = require('../controllers/OTPController')
 
 const router=new express.Router()
 
@@ -160,5 +161,11 @@ router.get("/room-details/:roomId",jwtmiddlewareAdmin,getRoomByRoomIdController)
 
 router.put('/edit-room/:roomId',jwtmiddlewareAdmin,multerMiddleware.array("newImages"),editRoomsController)
 
+router.put('/change-password-superAdmin',jwtMiddlewareSuperAdmin,superAdminChangePasswordController)
 
+router.post('/send-otp',sendOtpController)
+
+router.put('/change-admin-password',jwtmiddlewareAdmin,adminController.adminChangePasswordcontroller)
+
+superAdminChangePasswordController
 module.exports=router
