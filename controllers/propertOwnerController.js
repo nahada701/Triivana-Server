@@ -47,7 +47,8 @@ exports.propertyOwnerDashboardDataController = async (req, res) => {
                 $match: {
                     hotel: { $in: hotelIdArray },
                     checkInDate: { $gte: lastThirtyDays },
-                    status: "confirmed"
+                    paymentStatus: "paid",
+                    status: "confirmed",
                 }
             },
             {
@@ -63,7 +64,8 @@ exports.propertyOwnerDashboardDataController = async (req, res) => {
             {
                 $match: {
                     hotel: { $in: hotelIdArray },
-                    status: "confirmed"
+                    paymentStatus: "paid",
+                    status: "confirmed",
                 }
             },
             {
