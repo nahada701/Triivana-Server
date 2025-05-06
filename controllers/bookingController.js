@@ -126,7 +126,7 @@ console.log(propertyname);
                 <p style="color: #555;">We are looking forward to welcoming you! If you have any special requests, feel free to contact us.</p>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <a href="https://triivana.com" style="background-color: #2c3e50; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Visit Our Website</a>
+                    <a href="https://triivana.vercel.app/" style="background-color: #2c3e50; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Visit Our Website</a>
                 </div>
                 
                 <hr style="margin: 20px 0;">
